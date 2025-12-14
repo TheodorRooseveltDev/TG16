@@ -1,0 +1,23 @@
+{
+  "images" : [
+    {
+      "filename" : "a-luxurious-dark-vertical-gradient-backg_QQJJVUy9RBOGb80oHEfUpA_hEnO2JImRfOsy05sl3DCKQ.png",
+      "idiom" : "universal",
+      "scale" : "1x"
+    },
+    {
+      "filename" : "a-luxurious-dark-vertical-gradient-backg_QQJJVUy9RBOGb80oHEfUpA_hEnO2JImRfOsy05sl3DCKQ@2x.png",
+      "idiom" : "universal",
+      "scale" : "2x"
+    },
+    {
+      "filename" : "a-luxurious-dark-vertical-gradient-backg_QQJJVUy9RBOGb80oHEfUpA_hEnO2JImRfOsy05sl3DCKQ@3x.png",
+      "idiom" : "universal",
+      "scale" : "3x"
+    }
+  ],
+  "info" : {
+    "author" : "xcode",
+    "version" : 1
+  }
+}

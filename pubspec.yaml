@@ -1,0 +1,95 @@
+name: sc2
+description: "Premium Social Casino Flutter iOS App"
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.10.1
+
+dependencies:
+  flutter:
+    sdk: flutter
+  
+  # Fonts
+  google_fonts: ^6.1.0
+  
+  # Icons & SVG
+  flutter_svg: ^2.0.9
+  
+  # WebView for animated SVGs
+  webview_flutter: ^4.4.2
+  
+  # InAppWebView for Privacy & Terms
+  flutter_inappwebview: ^6.1.5
+  
+  # State Management
+  flutter_riverpod: ^2.4.9
+  
+  # Navigation
+  go_router: ^13.0.0
+  
+  # UI Utilities
+  shimmer: ^3.0.0
+  cached_network_image: ^3.3.1
+  
+  # Animations
+  flutter_animate: ^4.3.0
+  image_picker: ^1.2.1
+  permission_handler: ^11.3.1
+  url_launcher: ^6.2.1
+  
+  # Local Storage
+  shared_preferences: ^2.2.2
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+
+flutter:
+  uses-material-design: true
+  
+  assets:
+    - assets/
+    - assets/images/
+    - assets/images/game-previews/
+    - assets/images/game-screenshots/barbarossa/
+    - assets/images/game-screenshots/barbarossa_revenge/
+    - assets/images/game-screenshots/big_bamboo/
+    - assets/images/game-screenshots/brute_force/
+    - assets/images/game-screenshots/dasxboot/
+    - assets/images/game-screenshots/deadwood_xnudge/
+    - assets/images/game-screenshots/dinopolis/
+    - assets/images/game-screenshots/duck_hunters/
+    - assets/images/game-screenshots/fire_in_the_hole_2/
+    - assets/images/game-screenshots/iron_bank/
+    - assets/images/game-screenshots/jammin_jars_2/
+    - assets/images/game-screenshots/mental/
+    - assets/images/game-screenshots/mental_2/
+    - assets/images/game-screenshots/money_train_2/
+    - assets/images/game-screenshots/money_train_3/
+    - assets/images/game-screenshots/mystery_museum/
+    - assets/images/game-screenshots/nine_to_five/
+    - assets/images/game-screenshots/outsourced/
+    - assets/images/game-screenshots/pine_of_plinko_2/
+    - assets/images/game-screenshots/razor_returns/
+    - assets/images/game-screenshots/reactoonz/
+    - assets/images/game-screenshots/reactoonz_2/
+    - assets/images/game-screenshots/retro_sweets/
+    - assets/images/game-screenshots/retro_tapes/
+    - assets/images/game-screenshots/san_quentin_xways/
+    - assets/images/game-screenshots/snake_arena/
+    - assets/images/game-screenshots/the_crypt/
+    - assets/images/game-screenshots/tombstone/
+    - assets/images/game-screenshots/tombstone_r_i_p/
+    - assets/images/game-screenshots/xways_hoarder_xsplit/
+    - assets/images/game-screenshots/starlight_princess/
+    - assets/images/game-screenshots/gates_of_olympus/
+    - assets/images/game-screenshots/dog_house/
+    - assets/images/game-screenshots/madam_destiny_megaways/
+    - assets/images/game-screenshots/big_bass/
+    - assets/images/game-screenshots/sweet_bonaza/
+    - assets/images/game-screenshots/buffalo_king/
+    - assets/images/game-screenshots/shugar_rush/
+    - assets/images/game-screenshots/hot_fiesta/
+    - assets/images/game-screenshots/shugar_rush_1000/
