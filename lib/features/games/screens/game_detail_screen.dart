@@ -466,14 +466,18 @@ class _GameDetailScreenState extends State<GameDetailScreen>
                     right: 20,
                     bottom: 24,
                     child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.end,
+                      // Center vertically when no button, align to bottom when button exists
+                      crossAxisAlignment: (widget.game.screenshots != null &&
+                              widget.game.screenshots!.isNotEmpty)
+                          ? CrossAxisAlignment.end
+                          : CrossAxisAlignment.center,
                       children: [
                         // Game Icon/Logo
                         _buildGameIcon(),
-                        
+
                         const SizedBox(width: 16),
-                        
-                        // Title and Play Button
+
+                        // Title and Play Button (only if screenshots exist)
                         Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
@@ -496,9 +500,12 @@ class _GameDetailScreenState extends State<GameDetailScreen>
                                 maxLines: 2,
                                 overflow: TextOverflow.ellipsis,
                               ),
-                              const SizedBox(height: 12),
-                              // Play Now Button in hero
-                              _buildHeroPlayButton(),
+                              // Only show hero play button if there are screenshots
+                              if (widget.game.screenshots != null &&
+                                  widget.game.screenshots!.isNotEmpty) ...[
+                                const SizedBox(height: 12),
+                                _buildHeroPlayButton(),
+                              ],
                             ],
                           ),
                         ),
@@ -636,7 +643,8 @@ class _GameDetailScreenState extends State<GameDetailScreen>
   }
 
   Widget _buildContentSection() {
-    final hasScreenshots = widget.game.displayScreenshots.isNotEmpty;
+    final hasScreenshots = widget.game.screenshots != null &&
+        widget.game.screenshots!.isNotEmpty;
 
     return SlideTransition(
       position: _contentSlideAnimation,
@@ -731,8 +739,11 @@ class _GameDetailScreenState extends State<GameDetailScreen>
   }
 
   Widget _buildGameDescription() {
+    final description = widget.game.description ??
+        'Experience the thrill of ${widget.game.name}! This premium game offers stunning visuals and exciting gameplay.';
+
     return Text(
-      'Experience the thrill of ${widget.game.name}! Spin the reels and discover amazing bonus features, free spins, and massive win potential. This premium slot game offers stunning visuals and exciting gameplay.',
+      description,
       style: AppTypography.bodyMedium.copyWith(
         color: Colors.white.withOpacity(0.7),
         height: 1.6,

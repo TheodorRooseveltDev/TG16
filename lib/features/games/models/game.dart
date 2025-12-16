@@ -8,6 +8,7 @@ class Game {
   final String? animatedIcon;   // Animated icon URL (network, GIF/WebP)
   final String? banner;         // Banner image URL for game detail page
   final String? tag;
+  final String? description;    // Game description from database
   final List<String>? screenshots;
 
   // Legacy support for local assets
@@ -27,6 +28,7 @@ class Game {
     this.animatedIcon,
     this.banner,
     this.tag,
+    this.description,
     this.screenshots,
     this.image,
     this.animatedLogo,
@@ -120,6 +122,7 @@ class Game {
       // Support both: banner_url (database) and banner (legacy)
       banner: getString(json['banner_url']) ?? getString(json['banner']),
       tag: getString(json['tag']),
+      description: getString(json['desc']) ?? getString(json['description']),
       screenshots: screenshotsList,
       // Legacy fields
       image: getString(json['image']),
@@ -136,6 +139,7 @@ class Game {
       'animated_icon': animatedIcon,
       'banner': banner,
       'tag': tag,
+      'description': description,
       'screenshots': screenshots,
       'image': image,
       'animatedLogo': animatedLogo,
@@ -151,6 +155,7 @@ class Game {
     String? animatedIcon,
     String? banner,
     String? tag,
+    String? description,
     List<String>? screenshots,
     String? image,
     String? animatedLogo,
@@ -163,6 +168,7 @@ class Game {
       animatedIcon: animatedIcon ?? this.animatedIcon,
       banner: banner ?? this.banner,
       tag: tag ?? this.tag,
+      description: description ?? this.description,
       screenshots: screenshots ?? this.screenshots,
       image: image ?? this.image,
       animatedLogo: animatedLogo ?? this.animatedLogo,
