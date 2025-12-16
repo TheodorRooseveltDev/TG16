@@ -1,8 +1,11 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/theme/theme.dart';
+import '../../core/services/audio_service.dart';
 import '../../features/games/models/game.dart';
 
-class PremiumGameCard extends StatefulWidget {
+class PremiumGameCard extends ConsumerStatefulWidget {
   final Game game;
   final VoidCallback? onTap;
   final double width;
@@ -17,10 +20,10 @@ class PremiumGameCard extends StatefulWidget {
   });
 
   @override
-  State<PremiumGameCard> createState() => _PremiumGameCardState();
+  ConsumerState<PremiumGameCard> createState() => _PremiumGameCardState();
 }
 
-class _PremiumGameCardState extends State<PremiumGameCard>
+class _PremiumGameCardState extends ConsumerState<PremiumGameCard>
     with TickerProviderStateMixin {
   late AnimationController _pressController;
   late AnimationController _glowController;
@@ -65,12 +68,71 @@ class _PremiumGameCardState extends State<PremiumGameCard>
   void _onTapUp(TapUpDetails details) {
     setState(() => _isPressed = false);
     _pressController.reverse();
+
+    // Play tap sound and vibrate
+    final audioService = ref.read(audioServiceProvider);
+    final soundEnabled = ref.read(soundEnabledProvider);
+    final vibrationEnabled = ref.read(vibrationEnabledProvider);
+    audioService.playTapSound(enabled: soundEnabled);
+    audioService.lightVibrate(enabled: vibrationEnabled);
+
     widget.onTap?.call();
   }
 
   void _onTapCancel() {
     setState(() => _isPressed = false);
     _pressController.reverse();
+  }
+
+  Widget _buildGameImage() {
+    final imageUrl = widget.game.displayIcon;
+
+    // Check if it's a network URL
+    if (imageUrl.isNotEmpty && Game.isNetworkUrl(imageUrl)) {
+      return CachedNetworkImage(
+        imageUrl: imageUrl,
+        fit: BoxFit.cover,
+        placeholder: (context, url) => Container(
+          color: AppColors.backgroundCard,
+          child: const Center(
+            child: CircularProgressIndicator(
+              color: AppColors.primary,
+              strokeWidth: 2,
+            ),
+          ),
+        ),
+        errorWidget: (context, url, error) => Container(
+          color: AppColors.backgroundCard,
+          child: const Center(
+            child: Icon(Icons.casino, size: 40, color: Color(0xFFD0D0D0)),
+          ),
+        ),
+      );
+    }
+
+    // Fallback to asset image (legacy support)
+    if (imageUrl.isNotEmpty) {
+      return Image.asset(
+        imageUrl,
+        fit: BoxFit.cover,
+        errorBuilder: (context, error, stackTrace) {
+          return Container(
+            color: AppColors.backgroundCard,
+            child: const Center(
+              child: Icon(Icons.casino, size: 40, color: Color(0xFFD0D0D0)),
+            ),
+          );
+        },
+      );
+    }
+
+    // No image available
+    return Container(
+      color: AppColors.backgroundCard,
+      child: const Center(
+        child: Icon(Icons.casino, size: 40, color: Color(0xFFD0D0D0)),
+      ),
+    );
   }
 
   @override
@@ -116,18 +178,7 @@ class _PremiumGameCardState extends State<PremiumGameCard>
                   fit: StackFit.expand,
                   children: [
                     // Game image
-                    Image.asset(
-                      widget.game.image,
-                      fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) {
-                        return Container(
-                          color: AppColors.backgroundCard,
-                          child: const Center(
-                            child: Icon(Icons.casino, size: 40, color: Color(0xFFD0D0D0)),
-                          ),
-                        );
-                      },
-                    ),
+                    _buildGameImage(),
                     // Bottom gradient
                     Positioned(
                       left: 0, right: 0, bottom: 0, height: 100,
@@ -236,7 +287,7 @@ class _PremiumGameCardState extends State<PremiumGameCard>
 }
 
 // Large featured card with more details
-class FeaturedGameCard extends StatefulWidget {
+class FeaturedGameCard extends ConsumerStatefulWidget {
   final Game game;
   final VoidCallback? onTap;
 
@@ -247,10 +298,10 @@ class FeaturedGameCard extends StatefulWidget {
   });
 
   @override
-  State<FeaturedGameCard> createState() => _FeaturedGameCardState();
+  ConsumerState<FeaturedGameCard> createState() => _FeaturedGameCardState();
 }
 
-class _FeaturedGameCardState extends State<FeaturedGameCard>
+class _FeaturedGameCardState extends ConsumerState<FeaturedGameCard>
     with SingleTickerProviderStateMixin {
   late AnimationController _glowController;
 
@@ -269,13 +320,94 @@ class _FeaturedGameCardState extends State<FeaturedGameCard>
     super.dispose();
   }
 
+  Widget _buildFeaturedImage() {
+    final imageUrl = widget.game.displayIcon;
+
+    // Check if it's a network URL
+    if (imageUrl.isNotEmpty && Game.isNetworkUrl(imageUrl)) {
+      return CachedNetworkImage(
+        imageUrl: imageUrl,
+        fit: BoxFit.cover,
+        placeholder: (context, url) => Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                const Color(0xFFD0D0D0).withOpacity(0.3),
+                AppColors.backgroundCard,
+              ],
+            ),
+          ),
+        ),
+        errorWidget: (context, url, error) => Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                const Color(0xFFD0D0D0).withOpacity(0.3),
+                AppColors.backgroundCard,
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+
+    // Fallback to asset image (legacy support)
+    if (imageUrl.isNotEmpty) {
+      return Image.asset(
+        imageUrl,
+        fit: BoxFit.cover,
+        errorBuilder: (context, error, stackTrace) {
+          return Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  const Color(0xFFD0D0D0).withOpacity(0.3),
+                  AppColors.backgroundCard,
+                ],
+              ),
+            ),
+          );
+        },
+      );
+    }
+
+    // No image available
+    return Container(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            const Color(0xFFD0D0D0).withOpacity(0.3),
+            AppColors.backgroundCard,
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return AnimatedBuilder(
       animation: _glowController,
       builder: (context, child) {
         return GestureDetector(
-          onTap: widget.onTap,
+          onTap: () {
+            // Play tap sound and vibrate
+            final audioService = ref.read(audioServiceProvider);
+            final soundEnabled = ref.read(soundEnabledProvider);
+            final vibrationEnabled = ref.read(vibrationEnabledProvider);
+            audioService.playTapSound(enabled: soundEnabled);
+            audioService.lightVibrate(enabled: vibrationEnabled);
+
+            widget.onTap?.call();
+          },
           child: Container(
             height: 220,
             margin: const EdgeInsets.symmetric(horizontal: 20),
@@ -302,24 +434,7 @@ class _FeaturedGameCardState extends State<FeaturedGameCard>
                 fit: StackFit.expand,
                 children: [
                   // Background image
-                  Image.asset(
-                    widget.game.image,
-                    fit: BoxFit.cover,
-                    errorBuilder: (context, error, stackTrace) {
-                      return Container(
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
-                            colors: [
-                              const Color(0xFFD0D0D0).withOpacity(0.3),
-                              AppColors.backgroundCard,
-                            ],
-                          ),
-                        ),
-                      );
-                    },
-                  ),
+                  _buildFeaturedImage(),
                   // Gradient overlay
                   Container(
                     decoration: BoxDecoration(

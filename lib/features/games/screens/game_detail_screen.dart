@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
@@ -31,6 +32,9 @@ class _GameDetailScreenState extends State<GameDetailScreen>
   WebViewController? _webViewController;
   bool _webViewReady = false;
   bool _isPlaying = false;
+  WebViewController? _gameController;
+  bool _gameLoading = true;
+  bool _gameError = false;
 
   @override
   void initState() {
@@ -147,6 +151,57 @@ class _GameDetailScreenState extends State<GameDetailScreen>
     setState(() => _isPlaying = true);
   }
 
+  Widget _buildBannerImage() {
+    final bannerUrl = widget.game.displayBanner;
+
+    // Check if it's a network URL
+    if (bannerUrl.isNotEmpty && Game.isNetworkUrl(bannerUrl)) {
+      return CachedNetworkImage(
+        imageUrl: bannerUrl,
+        fit: BoxFit.cover,
+        placeholder: (context, url) => Container(
+          color: AppColors.backgroundCard,
+          child: const Center(
+            child: CircularProgressIndicator(
+              color: AppColors.primary,
+              strokeWidth: 2,
+            ),
+          ),
+        ),
+        errorWidget: (context, url, error) => Container(
+          color: AppColors.backgroundCard,
+          child: const Center(
+            child: Icon(Icons.casino, size: 60, color: Color(0xFFD0D0D0)),
+          ),
+        ),
+      );
+    }
+
+    // Fallback to asset image (legacy support)
+    if (bannerUrl.isNotEmpty) {
+      return Image.asset(
+        bannerUrl,
+        fit: BoxFit.cover,
+        errorBuilder: (context, error, stackTrace) {
+          return Container(
+            color: AppColors.backgroundCard,
+            child: const Center(
+              child: Icon(Icons.casino, size: 60, color: Color(0xFFD0D0D0)),
+            ),
+          );
+        },
+      );
+    }
+
+    // No image available
+    return Container(
+      color: AppColors.backgroundCard,
+      child: const Center(
+        child: Icon(Icons.casino, size: 60, color: Color(0xFFD0D0D0)),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     if (_isPlaying) {
@@ -172,6 +227,31 @@ class _GameDetailScreenState extends State<GameDetailScreen>
             ),
           ),
 
+          // Top gradient safe area overlay
+          Positioned(
+            top: 0,
+            left: 0,
+            right: 0,
+            child: IgnorePointer(
+              child: Container(
+                height: MediaQuery.of(context).padding.top + 20,
+                decoration: const BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      Colors.black,
+                      Color(0xCC000000), // black with 80% opacity
+                      Color(0x66000000), // black with 40% opacity
+                      Colors.transparent,
+                    ],
+                    stops: [0.0, 0.3, 0.7, 1.0],
+                  ),
+                ),
+              ),
+            ),
+          ),
+
           // Back Button (fixed)
           _buildBackButton(),
         ],
@@ -180,24 +260,145 @@ class _GameDetailScreenState extends State<GameDetailScreen>
   }
 
   Widget _buildGamePlayer() {
+    final iframeUrl = widget.game.iframe;
+
+    // Check if iframe URL is valid
+    if (iframeUrl.isEmpty || !Game.isNetworkUrl(iframeUrl)) {
+      return Scaffold(
+        backgroundColor: Colors.black,
+        body: Center(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                Icons.error_outline_rounded,
+                color: Colors.red.withOpacity(0.7),
+                size: 48,
+              ),
+              const SizedBox(height: 16),
+              const Text(
+                'Game URL not available',
+                style: TextStyle(
+                  color: Colors.white70,
+                  fontSize: 16,
+                ),
+              ),
+              const SizedBox(height: 8),
+              TextButton(
+                onPressed: () => setState(() => _isPlaying = false),
+                child: const Text(
+                  'Go Back',
+                  style: TextStyle(color: AppColors.primary),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    // Initialize game controller if not already done
+    _gameController ??= WebViewController()
+      ..setJavaScriptMode(JavaScriptMode.unrestricted)
+      ..setBackgroundColor(Colors.black)
+      ..setNavigationDelegate(
+        NavigationDelegate(
+          onPageStarted: (_) {
+            if (mounted) setState(() => _gameLoading = true);
+          },
+          onPageFinished: (_) {
+            if (mounted) setState(() => _gameLoading = false);
+          },
+          onWebResourceError: (error) {
+            debugPrint('WebView error: ${error.description}');
+            if (mounted) {
+              setState(() {
+                _gameLoading = false;
+                _gameError = true;
+              });
+            }
+          },
+        ),
+      )
+      ..loadRequest(Uri.parse(iframeUrl));
+
     return Scaffold(
       backgroundColor: Colors.black,
       body: Stack(
         children: [
           // Game WebView
-          WebViewWidget(
-            controller: WebViewController()
-              ..setJavaScriptMode(JavaScriptMode.unrestricted)
-              ..setBackgroundColor(Colors.black)
-              ..loadRequest(Uri.parse(widget.game.iframe)),
-          ),
+          WebViewWidget(controller: _gameController!),
+
+          // Loading indicator
+          if (_gameLoading)
+            const Center(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  CircularProgressIndicator(
+                    color: AppColors.primary,
+                    strokeWidth: 3,
+                  ),
+                  SizedBox(height: 16),
+                  Text(
+                    'Loading game...',
+                    style: TextStyle(
+                      color: Colors.white70,
+                      fontSize: 14,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+          // Error state
+          if (_gameError && !_gameLoading)
+            Center(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    Icons.error_outline_rounded,
+                    color: Colors.red.withOpacity(0.7),
+                    size: 48,
+                  ),
+                  const SizedBox(height: 16),
+                  const Text(
+                    'Failed to load game',
+                    style: TextStyle(
+                      color: Colors.white70,
+                      fontSize: 16,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  TextButton(
+                    onPressed: () {
+                      setState(() {
+                        _gameError = false;
+                        _gameLoading = true;
+                      });
+                      _gameController?.loadRequest(Uri.parse(widget.game.iframe));
+                    },
+                    child: const Text(
+                      'Retry',
+                      style: TextStyle(color: AppColors.primary),
+                    ),
+                  ),
+                ],
+              ),
+            ),
 
           // Close Button
           Positioned(
             top: MediaQuery.of(context).padding.top + 16,
             right: 16,
             child: GestureDetector(
-              onTap: () => setState(() => _isPlaying = false),
+              onTap: () => setState(() {
+                _isPlaying = false;
+                _gameController = null;
+                _gameLoading = true;
+                _gameError = false;
+              }),
               child: Container(
                 width: 44,
                 height: 44,
@@ -237,10 +438,7 @@ class _GameDetailScreenState extends State<GameDetailScreen>
                 children: [
                   // Background Image
                   Positioned.fill(
-                    child: Image.asset(
-                      widget.game.image,
-                      fit: BoxFit.cover,
-                    ),
+                    child: _buildBannerImage(),
                   ),
 
                   // Gradient Overlay
@@ -404,8 +602,10 @@ class _GameDetailScreenState extends State<GameDetailScreen>
         ),
       );
     }
-    
-    // Fallback to static image
+
+    // Fallback to static image (network or asset)
+    final iconUrl = widget.game.displayIcon;
+
     return Container(
       width: 90,
       height: 90,
@@ -430,10 +630,37 @@ class _GameDetailScreenState extends State<GameDetailScreen>
       ),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(16),
-        child: Image.asset(
-          widget.game.image,
-          fit: BoxFit.cover,
-        ),
+        child: iconUrl.isNotEmpty && Game.isNetworkUrl(iconUrl)
+            ? CachedNetworkImage(
+                imageUrl: iconUrl,
+                fit: BoxFit.cover,
+                placeholder: (context, url) => Container(
+                  color: AppColors.backgroundCard,
+                  child: const Center(
+                    child: CircularProgressIndicator(
+                      color: AppColors.primary,
+                      strokeWidth: 2,
+                    ),
+                  ),
+                ),
+                errorWidget: (context, url, error) => Container(
+                  color: AppColors.backgroundCard,
+                  child: const Icon(Icons.casino, color: Color(0xFFD0D0D0)),
+                ),
+              )
+            : iconUrl.isNotEmpty
+                ? Image.asset(
+                    iconUrl,
+                    fit: BoxFit.cover,
+                    errorBuilder: (_, __, ___) => Container(
+                      color: AppColors.backgroundCard,
+                      child: const Icon(Icons.casino, color: Color(0xFFD0D0D0)),
+                    ),
+                  )
+                : Container(
+                    color: AppColors.backgroundCard,
+                    child: const Icon(Icons.casino, color: Color(0xFFD0D0D0)),
+                  ),
       ),
     );
   }
@@ -544,19 +771,12 @@ class _GameDetailScreenState extends State<GameDetailScreen>
   }
 
   Widget _buildScreenshotsSection() {
-    // Use screenshots from game model, or fallback to generated paths
-    List<String> screenshotPaths;
-    
-    if (widget.game.screenshots != null && widget.game.screenshots!.isNotEmpty) {
-      screenshotPaths = widget.game.screenshots!;
-    } else {
-      // Fallback: generate paths based on game id
-      final ext = 'jpg';
-      screenshotPaths = [
-        'assets/images/game-screenshots/${widget.game.id}/screenshot_1.$ext',
-        'assets/images/game-screenshots/${widget.game.id}/screenshot_2.$ext',
-        'assets/images/game-screenshots/${widget.game.id}/screenshot_3.$ext',
-      ];
+    // Use screenshots from game model (already converted to full URLs)
+    final screenshotPaths = widget.game.displayScreenshots;
+
+    // If no screenshots, don't show section
+    if (screenshotPaths.isEmpty) {
+      return const SizedBox.shrink();
     }
 
     return SizedBox(
@@ -568,6 +788,8 @@ class _GameDetailScreenState extends State<GameDetailScreen>
         itemCount: screenshotPaths.length,
         itemBuilder: (context, index) {
           final isLast = index == screenshotPaths.length - 1;
+          final screenshotUrl = screenshotPaths[index];
+
           return Padding(
             padding: EdgeInsets.only(right: isLast ? 0 : 12),
             child: GestureDetector(
@@ -589,20 +811,44 @@ class _GameDetailScreenState extends State<GameDetailScreen>
                 ),
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(16),
-                  child: Image.asset(
-                    screenshotPaths[index],
-                    fit: BoxFit.cover,
-                    errorBuilder: (_, __, ___) => Container(
-                      color: AppColors.backgroundCard,
-                      child: Center(
-                        child: Icon(
-                          Icons.image_not_supported_outlined,
-                          color: Colors.white.withOpacity(0.3),
-                          size: 32,
+                  child: Game.isNetworkUrl(screenshotUrl)
+                      ? CachedNetworkImage(
+                          imageUrl: screenshotUrl,
+                          fit: BoxFit.cover,
+                          placeholder: (context, url) => Container(
+                            color: AppColors.backgroundCard,
+                            child: const Center(
+                              child: CircularProgressIndicator(
+                                color: AppColors.primary,
+                                strokeWidth: 2,
+                              ),
+                            ),
+                          ),
+                          errorWidget: (context, url, error) => Container(
+                            color: AppColors.backgroundCard,
+                            child: Center(
+                              child: Icon(
+                                Icons.image_not_supported_outlined,
+                                color: Colors.white.withOpacity(0.3),
+                                size: 32,
+                              ),
+                            ),
+                          ),
+                        )
+                      : Image.asset(
+                          screenshotUrl,
+                          fit: BoxFit.cover,
+                          errorBuilder: (_, __, ___) => Container(
+                            color: AppColors.backgroundCard,
+                            child: Center(
+                              child: Icon(
+                                Icons.image_not_supported_outlined,
+                                color: Colors.white.withOpacity(0.3),
+                                size: 32,
+                              ),
+                            ),
+                          ),
                         ),
-                      ),
-                    ),
-                  ),
                 ),
               ),
             ),
@@ -775,19 +1021,36 @@ class _FullScreenGalleryState extends State<_FullScreenGallery> {
               setState(() => _currentIndex = index);
             },
             itemBuilder: (context, index) {
+              final imageUrl = widget.imagePaths[index];
               return InteractiveViewer(
                 minScale: 0.5,
                 maxScale: 4.0,
                 child: Center(
-                  child: Image.asset(
-                    widget.imagePaths[index],
-                    fit: BoxFit.contain,
-                    errorBuilder: (_, __, ___) => const Icon(
-                      Icons.image_not_supported_rounded,
-                      color: Colors.white24,
-                      size: 60,
-                    ),
-                  ),
+                  child: Game.isNetworkUrl(imageUrl)
+                      ? CachedNetworkImage(
+                          imageUrl: imageUrl,
+                          fit: BoxFit.contain,
+                          placeholder: (context, url) => const Center(
+                            child: CircularProgressIndicator(
+                              color: AppColors.primary,
+                              strokeWidth: 2,
+                            ),
+                          ),
+                          errorWidget: (context, url, error) => const Icon(
+                            Icons.image_not_supported_rounded,
+                            color: Colors.white24,
+                            size: 60,
+                          ),
+                        )
+                      : Image.asset(
+                          imageUrl,
+                          fit: BoxFit.contain,
+                          errorBuilder: (_, __, ___) => const Icon(
+                            Icons.image_not_supported_rounded,
+                            color: Colors.white24,
+                            size: 60,
+                          ),
+                        ),
                 ),
               );
             },

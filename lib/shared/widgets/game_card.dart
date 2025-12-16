@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import '../../core/theme/theme.dart';
 import '../../features/games/models/game.dart';
@@ -58,6 +59,63 @@ class _GameCardState extends State<GameCard>
     }
   }
 
+  Widget _buildGameImage() {
+    final imageUrl = widget.game.displayIcon;
+
+    // Check if it's a network URL
+    if (imageUrl.isNotEmpty && Game.isNetworkUrl(imageUrl)) {
+      return CachedNetworkImage(
+        imageUrl: imageUrl,
+        fit: BoxFit.cover,
+        placeholder: (context, url) => Container(
+          color: AppColors.backgroundTertiary,
+          child: const Center(
+            child: CircularProgressIndicator(
+              color: AppColors.primary,
+              strokeWidth: 2,
+            ),
+          ),
+        ),
+        errorWidget: (context, url, error) => Container(
+          color: AppColors.backgroundTertiary,
+          child: const Icon(
+            Icons.casino,
+            size: 40,
+            color: AppColors.textTertiary,
+          ),
+        ),
+      );
+    }
+
+    // Fallback to asset image (legacy support)
+    if (imageUrl.isNotEmpty) {
+      return Image.asset(
+        imageUrl,
+        fit: BoxFit.cover,
+        errorBuilder: (context, error, stackTrace) {
+          return Container(
+            color: AppColors.backgroundTertiary,
+            child: const Icon(
+              Icons.casino,
+              size: 40,
+              color: AppColors.textTertiary,
+            ),
+          );
+        },
+      );
+    }
+
+    // No image available
+    return Container(
+      color: AppColors.backgroundTertiary,
+      child: const Icon(
+        Icons.casino,
+        size: 40,
+        color: AppColors.textTertiary,
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
@@ -82,20 +140,7 @@ class _GameCardState extends State<GameCard>
             fit: StackFit.expand,
             children: [
               // Game Image
-              Image.asset(
-                widget.game.image,
-                fit: BoxFit.cover,
-                errorBuilder: (context, error, stackTrace) {
-                  return Container(
-                    color: AppColors.backgroundTertiary,
-                    child: const Icon(
-                      Icons.casino,
-                      size: 40,
-                      color: AppColors.textTertiary,
-                    ),
-                  );
-                },
-              ),
+              _buildGameImage(),
 
               // Gradient overlay at bottom
               Positioned(

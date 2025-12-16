@@ -1,17 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import '../../../core/theme/theme.dart';
 import '../../../core/constants/app_strings.dart';
+import '../../../core/services/audio_service.dart';
 import '../../../shared/widgets/webview_screen.dart';
 import '../widgets/contact_us_modal.dart';
-
-// Settings state providers
-final soundEnabledProvider = StateProvider<bool>((ref) => true);
-final musicEnabledProvider = StateProvider<bool>((ref) => true);
-final vibrationEnabledProvider = StateProvider<bool>((ref) => true);
-final notificationsEnabledProvider = StateProvider<bool>((ref) => true);
 
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
@@ -21,17 +14,17 @@ class SettingsScreen extends ConsumerWidget {
     final soundEnabled = ref.watch(soundEnabledProvider);
     final musicEnabled = ref.watch(musicEnabledProvider);
     final vibrationEnabled = ref.watch(vibrationEnabledProvider);
-    final notificationsEnabled = ref.watch(notificationsEnabledProvider);
+    final audioService = ref.watch(audioServiceProvider);
+    final topPadding = MediaQuery.of(context).padding.top;
 
-    return SafeArea(
-      bottom: false,
-      child: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const SizedBox(height: 20),
+    return SingleChildScrollView(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Top padding for status bar area (content scrolls under gradient)
+          SizedBox(height: topPadding + 20),
 
-            // Page Header (matching Home & Games style)
+          // Page Header (matching Home & Games style)
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20),
               child: Column(
@@ -67,7 +60,11 @@ class SettingsScreen extends ConsumerWidget {
                   title: AppStrings.soundEffects,
                   value: soundEnabled,
                   onChanged: (value) {
-                    ref.read(soundEnabledProvider.notifier).state = value;
+                    ref.read(soundEnabledProvider.notifier).setValue(value);
+                    // Play a tap sound to demonstrate
+                    if (value) {
+                      audioService.playTapSound(enabled: true);
+                    }
                   },
                 ),
                 _buildToggleTile(
@@ -75,7 +72,12 @@ class SettingsScreen extends ConsumerWidget {
                   title: AppStrings.music,
                   value: musicEnabled,
                   onChanged: (value) {
-                    ref.read(musicEnabledProvider.notifier).state = value;
+                    ref.read(musicEnabledProvider.notifier).setValue(value);
+                    if (value) {
+                      audioService.playBackgroundMusic(enabled: true);
+                    } else {
+                      audioService.stopBackgroundMusic();
+                    }
                   },
                 ),
                 _buildToggleTile(
@@ -83,16 +85,11 @@ class SettingsScreen extends ConsumerWidget {
                   title: AppStrings.vibration,
                   value: vibrationEnabled,
                   onChanged: (value) {
-                    ref.read(vibrationEnabledProvider.notifier).state = value;
-                  },
-                ),
-                _buildToggleTile(
-                  icon: Icons.notifications_rounded,
-                  title: AppStrings.notifications,
-                  value: notificationsEnabled,
-                  onChanged: (value) {
-                    ref.read(notificationsEnabledProvider.notifier).state =
-                        value;
+                    ref.read(vibrationEnabledProvider.notifier).setValue(value);
+                    // Demonstrate vibration when enabled
+                    if (value) {
+                      audioService.lightVibrate(enabled: true);
+                    }
                   },
                   showDivider: false,
                 ),
@@ -111,7 +108,11 @@ class SettingsScreen extends ConsumerWidget {
                   context: context,
                   icon: Icons.mail_rounded,
                   title: AppStrings.contactUs,
-                  onTap: () => ContactUsModal.show(context),
+                  onTap: () {
+                    audioService.playTapSound(enabled: soundEnabled);
+                    audioService.lightVibrate(enabled: vibrationEnabled);
+                    ContactUsModal.show(context);
+                  },
                   showDivider: false,
                 ),
               ]),
@@ -129,57 +130,37 @@ class SettingsScreen extends ConsumerWidget {
                   context: context,
                   icon: Icons.description_rounded,
                   title: AppStrings.termsOfService,
-                  onTap: () => WebViewScreen.open(
-                    context,
-                    url: 'https://example.com',
-                    title: 'Terms of Service',
-                  ),
+                  onTap: () {
+                    audioService.playTapSound(enabled: soundEnabled);
+                    audioService.lightVibrate(enabled: vibrationEnabled);
+                    WebViewScreen.open(
+                      context,
+                      url: 'https://example.com',
+                      title: 'Terms of Service',
+                    );
+                  },
                 ),
                 _buildNavigationTile(
                   context: context,
                   icon: Icons.privacy_tip_rounded,
                   title: AppStrings.privacyPolicy,
-                  onTap: () => WebViewScreen.open(
-                    context,
-                    url: 'https://example.com',
-                    title: 'Privacy Policy',
-                  ),
+                  onTap: () {
+                    audioService.playTapSound(enabled: soundEnabled);
+                    audioService.lightVibrate(enabled: vibrationEnabled);
+                    WebViewScreen.open(
+                      context,
+                      url: 'https://example.com',
+                      title: 'Privacy Policy',
+                    );
+                  },
                   showDivider: false,
                 ),
               ]),
             ),
 
-            const SizedBox(height: 32),
-
-            // About Section
-            _buildSectionHeader(context, title: 'About'),
-            const SizedBox(height: 16),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: _buildSettingsCard([
-                _buildInfoTile(
-                  icon: Icons.info_rounded,
-                  title: AppStrings.version,
-                  value: '1.0.0',
-                  showDivider: false,
-                ),
-              ]),
-            ),
-
-            const SizedBox(height: 32),
-
-            // Danger Zone Section
-            _buildSectionHeader(context, title: 'Danger Zone'),
-            const SizedBox(height: 16),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: _buildDeleteButton(context, ref),
-            ),
-
-            // Bottom padding for navbar
-            SizedBox(height: 120 + MediaQuery.of(context).padding.bottom),
-          ],
-        ),
+          // Bottom padding for navbar
+          SizedBox(height: 120 + MediaQuery.of(context).padding.bottom),
+        ],
       ),
     );
   }
@@ -367,220 +348,5 @@ class SettingsScreen extends ConsumerWidget {
           ),
       ],
     );
-  }
-
-  Widget _buildInfoTile({
-    required IconData icon,
-    required String title,
-    required String value,
-    bool showDivider = true,
-  }) {
-    return Column(
-      children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-          child: Row(
-            children: [
-              Container(
-                width: 44,
-                height: 44,
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [
-                      AppColors.primary.withOpacity(0.2),
-                      AppColors.primary.withOpacity(0.05),
-                    ],
-                  ),
-                  borderRadius: BorderRadius.circular(14),
-                  border: Border.all(color: AppColors.primary.withOpacity(0.3)),
-                ),
-                child: Icon(icon, color: AppColors.primary, size: 22),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Text(
-                  title,
-                  style: AppTypography.bodyMedium.copyWith(
-                    color: Colors.white,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-              ),
-              Text(
-                value,
-                style: AppTypography.bodyMedium.copyWith(
-                  color: AppColors.textTertiary,
-                ),
-              ),
-            ],
-          ),
-        ),
-        if (showDivider)
-          Container(
-            margin: const EdgeInsets.symmetric(horizontal: 20),
-            height: 1,
-            color: Colors.white.withOpacity(0.05),
-          ),
-      ],
-    );
-  }
-
-  Widget _buildDeleteButton(BuildContext context, WidgetRef ref) {
-    return GestureDetector(
-      onTap: () => _showDeleteConfirmation(context, ref),
-      child: Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              Colors.red.withOpacity(0.15),
-              Colors.red.withOpacity(0.05),
-            ],
-          ),
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: Colors.red.withOpacity(0.3)),
-        ),
-        child: Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(10),
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [
-                    Colors.red.withOpacity(0.2),
-                    Colors.red.withOpacity(0.05),
-                  ],
-                ),
-                borderRadius: BorderRadius.circular(14),
-                border: Border.all(color: Colors.red.withOpacity(0.3)),
-              ),
-              child: const Icon(Icons.delete_forever_rounded, color: Colors.red, size: 22),
-            ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Delete Everything',
-                    style: AppTypography.bodyMedium.copyWith(
-                      color: Colors.red,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    'Clear all data and start fresh',
-                    style: AppTypography.bodySmall.copyWith(
-                      color: Colors.red.withOpacity(0.7),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            Icon(
-              Icons.chevron_right_rounded,
-              color: Colors.red.withOpacity(0.5),
-              size: 24,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  void _showDeleteConfirmation(BuildContext context, WidgetRef ref) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        backgroundColor: AppColors.backgroundCard,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
-          side: BorderSide(color: Colors.red.withOpacity(0.3)),
-        ),
-        title: Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: Colors.red.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: const Icon(Icons.warning_rounded, color: Colors.red, size: 24),
-            ),
-            const SizedBox(width: 12),
-            const Text(
-              'Delete Everything?',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 18,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ],
-        ),
-        content: Text(
-          'This will permanently delete all your data and preferences. You will be redirected to the onboarding screen. This action cannot be undone.',
-          style: TextStyle(
-            color: AppColors.textSecondary,
-            fontSize: 14,
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text(
-              'Cancel',
-              style: TextStyle(
-                color: AppColors.textSecondary,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-          ),
-          TextButton(
-            onPressed: () async {
-              Navigator.pop(context);
-              await _deleteEverything(context, ref);
-            },
-            style: TextButton.styleFrom(
-              backgroundColor: Colors.red.withOpacity(0.1),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10),
-              ),
-            ),
-            child: const Text(
-              'Delete',
-              style: TextStyle(
-                color: Colors.red,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Future<void> _deleteEverything(BuildContext context, WidgetRef ref) async {
-    // Clear all shared preferences
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.clear();
-
-    // Reset all providers to default values
-    ref.read(soundEnabledProvider.notifier).state = true;
-    ref.read(musicEnabledProvider.notifier).state = true;
-    ref.read(vibrationEnabledProvider.notifier).state = true;
-    ref.read(notificationsEnabledProvider.notifier).state = true;
-
-    // Navigate to onboarding
-    if (context.mounted) {
-      context.go('/onboarding');
-    }
   }
 }

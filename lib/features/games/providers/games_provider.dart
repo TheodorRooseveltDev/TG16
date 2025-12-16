@@ -1,18 +1,28 @@
-import 'dart:convert';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/game.dart';
+import '../repository/games_repository.dart';
 
+// Repository provider
+final gamesRepositoryProvider = Provider<GamesRepository>((ref) {
+  return GamesRepository();
+});
+
+// Main games provider - fetches all games from Supabase
 final gamesProvider = FutureProvider<List<Game>>((ref) async {
-  final String jsonString = await rootBundle.loadString('assets/games-data.json');
-  final Map<String, dynamic> jsonData = json.decode(jsonString);
-  final List<dynamic> gamesJson = jsonData['games'] as List<dynamic>;
+  final repository = ref.read(gamesRepositoryProvider);
+  final games = await repository.fetchGames();
 
-  final games = gamesJson.map((gameJson) {
-    final game = Game.fromJson(gameJson as Map<String, dynamic>);
-    // Assign random tags to some games for visual variety
+  // Assign tags to some games for visual variety
+  return games.asMap().entries.map((entry) {
+    final index = entry.key;
+    final game = entry.value;
+
+    // Only assign tag if game doesn't already have one
+    if (game.tag != null && game.tag!.isNotEmpty) {
+      return game;
+    }
+
     String? tag;
-    final index = gamesJson.indexOf(gameJson);
     if (index % 7 == 0) {
       tag = 'NEW';
     } else if (index % 5 == 0) {
@@ -20,40 +30,47 @@ final gamesProvider = FutureProvider<List<Game>>((ref) async {
     } else if (index % 11 == 0) {
       tag = 'EXCLUSIVE';
     }
-    return Game(
-      id: game.id,
-      name: game.name,
-      iframe: game.iframe,
-      image: game.image,
-      animatedLogo: game.animatedLogo,
-      tag: tag,
-      screenshots: game.screenshots,
-    );
-  }).toList();
 
-  return games;
+    return tag != null ? game.copyWith(tag: tag) : game;
+  }).toList();
 });
 
-// Premium games (first 10)
+// Premium games - games with animated icons (first 10)
 final animatedGamesProvider = FutureProvider<List<Game>>((ref) async {
   final games = await ref.watch(gamesProvider.future);
-  return games.take(10).toList();
+  // Filter games that have animated icons, take first 10
+  final premiumGames = games
+      .where((game) => game.hasAnimatedIcon || game.animatedLogo != null)
+      .take(10)
+      .toList();
+
+  // If no animated games found, just return first 10
+  if (premiumGames.isEmpty) {
+    return games.take(10).toList();
+  }
+  return premiumGames;
 });
 
-// More games (rest of them)
+// Static/More games - the rest
 final staticGamesProvider = FutureProvider<List<Game>>((ref) async {
   final games = await ref.watch(gamesProvider.future);
-  return games.skip(10).toList();
+  final premiumGames = await ref.watch(animatedGamesProvider.future);
+
+  // Return games not in premium list
+  final premiumIds = premiumGames.map((g) => g.id).toSet();
+  return games.where((game) => !premiumIds.contains(game.id)).toList();
 });
 
+// Featured games for hero section
 final featuredGamesProvider = FutureProvider<List<Game>>((ref) async {
   final games = await ref.watch(gamesProvider.future);
-  // Return first 6 games as featured
   return games.take(6).toList();
 });
 
+// Selected category for filtering
 final selectedCategoryProvider = StateProvider<String>((ref) => 'All');
 
+// Filtered games based on selected category
 final filteredGamesProvider = Provider<AsyncValue<List<Game>>>((ref) {
   final gamesAsync = ref.watch(gamesProvider);
   final selectedCategory = ref.watch(selectedCategoryProvider);
@@ -62,8 +79,24 @@ final filteredGamesProvider = Provider<AsyncValue<List<Game>>>((ref) {
     if (selectedCategory == 'All') {
       return games;
     }
-    // In a real app, you'd filter by actual category
-    // For now, we'll just return all games
-    return games;
+    // Filter by tag
+    return games.where((game) => game.tag == selectedCategory).toList();
+  });
+});
+
+// Search provider
+final searchQueryProvider = StateProvider<String>((ref) => '');
+
+final searchedGamesProvider = Provider<AsyncValue<List<Game>>>((ref) {
+  final gamesAsync = ref.watch(gamesProvider);
+  final query = ref.watch(searchQueryProvider).toLowerCase();
+
+  return gamesAsync.whenData((games) {
+    if (query.isEmpty) {
+      return games;
+    }
+    return games
+        .where((game) => game.name.toLowerCase().contains(query))
+        .toList();
   });
 });

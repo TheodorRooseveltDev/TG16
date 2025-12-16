@@ -50,7 +50,7 @@ class _PremiumNavbarState extends State<PremiumNavbar>
     return Positioned(
       left: 20,
       right: 20,
-      bottom: 20 + MediaQuery.of(context).padding.bottom,
+      bottom: 15,
       child: AnimatedBuilder(
         animation: _glowAnimation,
         builder: (context, child) {

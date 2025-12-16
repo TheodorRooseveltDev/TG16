@@ -19,11 +19,17 @@ class LuxuryCasinoApp extends StatelessWidget {
       ),
     );
 
-    return MaterialApp.router(
-      title: 'Luxury Casino',
-      debugShowCheckedModeBanner: false,
-      theme: AppTheme.darkTheme,
-      routerConfig: router,
+    return GestureDetector(
+      onTap: () {
+        // Dismiss keyboard when tapping outside of text fields
+        FocusManager.instance.primaryFocus?.unfocus();
+      },
+      child: MaterialApp.router(
+        title: 'Luxury Casino',
+        debugShowCheckedModeBanner: false,
+        theme: AppTheme.darkTheme,
+        routerConfig: router,
+      ),
     );
   }
 }

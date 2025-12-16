@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/theme/theme.dart';
+import '../models/game.dart';
 import '../providers/games_provider.dart';
 import '../../../shared/widgets/premium_game_card.dart';
 import '../../../shared/widgets/effects.dart';
@@ -12,17 +13,17 @@ class GamesScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final animatedGamesAsync = ref.watch(animatedGamesProvider);
-    final allGamesAsync = ref.watch(gamesProvider);
+    final staticGamesAsync = ref.watch(staticGamesProvider);
+    final topPadding = MediaQuery.of(context).padding.top;
 
-    return SafeArea(
-      bottom: false,
-      child: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const SizedBox(height: 20),
-            
-            // Page Header (like before)
+    return SingleChildScrollView(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Top padding for status bar area (content scrolls under gradient)
+          SizedBox(height: topPadding + 20),
+
+          // Page Header
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20),
               child: Column(
@@ -44,40 +45,68 @@ class GamesScreen extends ConsumerWidget {
                 ],
               ),
             ),
-            
+
             const SizedBox(height: 28),
 
-            // Premium Games Section (animated)
+            // Premium Games Section (animated icons)
             _buildSectionHeader(context, title: 'Premium Games'),
             const SizedBox(height: 16),
             _buildAnimatedGamesCarousel(animatedGamesAsync),
 
             const SizedBox(height: 32),
 
-            // All Games Section
-            _buildSectionHeader(context, title: 'Slots'),
-            const SizedBox(height: 16),
-            _buildGamesCarousel(allGamesAsync, 10, 20),
+            // Rest of games in sections
+            staticGamesAsync.when(
+              data: (games) => _buildGameSections(context, games),
+              loading: () => _buildLoadingSection(),
+              error: (_, __) => const SizedBox.shrink(),
+            ),
 
-            const SizedBox(height: 32),
-
-            // More Games
-            _buildSectionHeader(context, title: 'Popular'),
-            const SizedBox(height: 16),
-            _buildGamesCarousel(allGamesAsync, 20, 30),
-
-            const SizedBox(height: 32),
-
-            // Even More Games
-            _buildSectionHeader(context, title: 'New Games'),
-            const SizedBox(height: 16),
-            _buildGamesCarousel(allGamesAsync, 30, 40),
-
-            // Bottom padding for navbar
-            SizedBox(height: 120 + MediaQuery.of(context).padding.bottom),
-          ],
-        ),
+          // Bottom padding for navbar
+          SizedBox(height: 120 + MediaQuery.of(context).padding.bottom),
+        ],
       ),
+    );
+  }
+
+  Widget _buildGameSections(BuildContext context, List<Game> games) {
+    if (games.isEmpty) return const SizedBox.shrink();
+
+    // Split games into chunks for different sections
+    final sectionSize = (games.length / 3).ceil().clamp(1, 10);
+    final sections = <MapEntry<String, List<Game>>>[];
+
+    if (games.isNotEmpty) {
+      sections.add(MapEntry('Slots', games.take(sectionSize).toList()));
+    }
+    if (games.length > sectionSize) {
+      sections.add(MapEntry('Popular', games.skip(sectionSize).take(sectionSize).toList()));
+    }
+    if (games.length > sectionSize * 2) {
+      sections.add(MapEntry('New Games', games.skip(sectionSize * 2).toList()));
+    }
+
+    return Column(
+      children: sections.map((section) {
+        return Column(
+          children: [
+            _buildSectionHeader(context, title: section.key),
+            const SizedBox(height: 16),
+            _buildGamesCarouselFromList(section.value),
+            const SizedBox(height: 32),
+          ],
+        );
+      }).toList(),
+    );
+  }
+
+  Widget _buildLoadingSection() {
+    return Column(
+      children: [
+        _buildLoadingCarousel(),
+        const SizedBox(height: 32),
+        _buildLoadingCarousel(),
+      ],
     );
   }
 
@@ -152,31 +181,26 @@ class GamesScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildGamesCarousel(AsyncValue allGamesAsync, int start, int end) {
+  Widget _buildGamesCarouselFromList(List<Game> games) {
+    if (games.isEmpty) return const SizedBox.shrink();
+
     return SizedBox(
       height: 240,
-      child: allGamesAsync.when(
-        data: (games) {
-          final subset = games.skip(start).take(end - start).toList();
-          return ListView.builder(
-            scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.symmetric(horizontal: 20),
-            itemCount: subset.length,
-            itemBuilder: (context, index) => Padding(
-              padding: EdgeInsets.only(right: index < subset.length - 1 ? 16 : 0),
-              child: PremiumGameCard(
-                game: subset[index],
-                width: 180,
-                height: 240,
-                onTap: () {
-                  context.push('/game/${subset[index].id}', extra: subset[index]);
-                },
-              ),
-            ),
-          );
-        },
-        loading: () => _buildLoadingCarousel(),
-        error: (_, __) => const Center(child: Text('Error loading games')),
+      child: ListView.builder(
+        scrollDirection: Axis.horizontal,
+        padding: const EdgeInsets.symmetric(horizontal: 20),
+        itemCount: games.length,
+        itemBuilder: (context, index) => Padding(
+          padding: EdgeInsets.only(right: index < games.length - 1 ? 16 : 0),
+          child: PremiumGameCard(
+            game: games[index],
+            width: 180,
+            height: 240,
+            onTap: () {
+              context.push('/game/${games[index].id}', extra: games[index]);
+            },
+          ),
+        ),
       ),
     );
   }
