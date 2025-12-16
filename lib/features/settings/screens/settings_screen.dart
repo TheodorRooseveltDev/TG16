@@ -12,7 +12,6 @@ class SettingsScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final soundEnabled = ref.watch(soundEnabledProvider);
-    final musicEnabled = ref.watch(musicEnabledProvider);
     final vibrationEnabled = ref.watch(vibrationEnabledProvider);
     final audioService = ref.watch(audioServiceProvider);
     final topPadding = MediaQuery.of(context).padding.top;
@@ -64,19 +63,6 @@ class SettingsScreen extends ConsumerWidget {
                     // Play a tap sound to demonstrate
                     if (value) {
                       audioService.playTapSound(enabled: true);
-                    }
-                  },
-                ),
-                _buildToggleTile(
-                  icon: Icons.music_note_rounded,
-                  title: AppStrings.music,
-                  value: musicEnabled,
-                  onChanged: (value) {
-                    ref.read(musicEnabledProvider.notifier).setValue(value);
-                    if (value) {
-                      audioService.playBackgroundMusic(enabled: true);
-                    } else {
-                      audioService.stopBackgroundMusic();
                     }
                   },
                 ),

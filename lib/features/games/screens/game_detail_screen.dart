@@ -473,7 +473,7 @@ class _GameDetailScreenState extends State<GameDetailScreen>
                         
                         const SizedBox(width: 16),
                         
-                        // Title and Description
+                        // Title and Play Button
                         Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
@@ -496,39 +496,9 @@ class _GameDetailScreenState extends State<GameDetailScreen>
                                 maxLines: 2,
                                 overflow: TextOverflow.ellipsis,
                               ),
-                              const SizedBox(height: 8),
-                              // Mini Description
-                              Text(
-                                'Premium Slot • High Volatility • 96.5% RTP',
-                                style: AppTypography.bodySmall.copyWith(
-                                  color: Colors.white.withOpacity(0.8),
-                                  letterSpacing: 0.3,
-                                ),
-                              ),
-                              const SizedBox(height: 6),
-                              // Provider Tag
-                              Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 10,
-                                  vertical: 4,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: AppColors.primary.withOpacity(0.2),
-                                  borderRadius: BorderRadius.circular(12),
-                                  border: Border.all(
-                                    color: AppColors.primary.withOpacity(0.4),
-                                  ),
-                                ),
-                                child: Text(
-                                  '⭐ FEATURED',
-                                  style: AppTypography.labelSmall.copyWith(
-                                    color: AppColors.primary,
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 10,
-                                    letterSpacing: 1,
-                                  ),
-                                ),
-                              ),
+                              const SizedBox(height: 12),
+                              // Play Now Button in hero
+                              _buildHeroPlayButton(),
                             ],
                           ),
                         ),
@@ -666,6 +636,8 @@ class _GameDetailScreenState extends State<GameDetailScreen>
   }
 
   Widget _buildContentSection() {
+    final hasScreenshots = widget.game.displayScreenshots.isNotEmpty;
+
     return SlideTransition(
       position: _contentSlideAnimation,
       child: FadeTransition(
@@ -687,7 +659,7 @@ class _GameDetailScreenState extends State<GameDetailScreen>
             children: [
               // About Section Header
               _buildSectionHeader('About'),
-              
+
               const SizedBox(height: 12),
 
               // Game Description - needs right padding
@@ -696,15 +668,13 @@ class _GameDetailScreenState extends State<GameDetailScreen>
                 child: _buildGameDescription(),
               ),
 
-              const SizedBox(height: 24),
-
-              // Screenshots Section Header
-              _buildSectionHeader('Screenshots'),
-              
-              const SizedBox(height: 12),
-
-              // Screenshots - starts at 24 padding, ends at screen edge
-              _buildScreenshotsSection(),
+              // Screenshots Section - only show if screenshots exist
+              if (hasScreenshots) ...[
+                const SizedBox(height: 24),
+                _buildSectionHeader('Screenshots'),
+                const SizedBox(height: 12),
+                _buildScreenshotsSection(),
+              ],
 
               const SizedBox(height: 28),
 
@@ -766,6 +736,68 @@ class _GameDetailScreenState extends State<GameDetailScreen>
       style: AppTypography.bodyMedium.copyWith(
         color: Colors.white.withOpacity(0.7),
         height: 1.6,
+      ),
+    );
+  }
+
+  Widget _buildHeroPlayButton() {
+    return GestureDetector(
+      onTap: _playGame,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+        decoration: BoxDecoration(
+          gradient: const LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              Color(0xFF909090),
+              Color(0xFFB8B8B8),
+              Color(0xFFE0E0E0),
+              Color(0xFFFFFFFF),
+              Color(0xFFF5F5F5),
+              Color(0xFFD8D8D8),
+              Color(0xFFB0B0B0),
+              Color(0xFF888888),
+            ],
+            stops: [0.0, 0.12, 0.3, 0.45, 0.55, 0.7, 0.88, 1.0],
+          ),
+          borderRadius: BorderRadius.circular(25),
+          border: Border.all(
+            color: const Color(0xFFD0D0D0),
+            width: 1,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.white.withOpacity(0.3),
+              blurRadius: 10,
+              spreadRadius: -2,
+            ),
+            BoxShadow(
+              color: Colors.black.withOpacity(0.4),
+              blurRadius: 15,
+              offset: const Offset(0, 5),
+            ),
+          ],
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(
+              Icons.play_arrow_rounded,
+              color: Color(0xFF2A2A2A),
+              size: 24,
+            ),
+            const SizedBox(width: 6),
+            Text(
+              'PLAY NOW',
+              style: AppTypography.labelMedium.copyWith(
+                color: const Color(0xFF2A2A2A),
+                fontWeight: FontWeight.bold,
+                letterSpacing: 1.5,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

@@ -64,3 +64,4 @@ flutter:
   assets:
     - .env
     - assets/sounds/
+    - assets/icon.png

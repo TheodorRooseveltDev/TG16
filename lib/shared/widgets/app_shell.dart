@@ -17,51 +17,7 @@ class AppShell extends ConsumerStatefulWidget {
   ConsumerState<AppShell> createState() => _AppShellState();
 }
 
-class _AppShellState extends ConsumerState<AppShell> with WidgetsBindingObserver {
-  bool _musicInitialized = false;
-
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addObserver(this);
-    // Start music after first frame
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _initMusic();
-    });
-  }
-
-  @override
-  void dispose() {
-    WidgetsBinding.instance.removeObserver(this);
-    super.dispose();
-  }
-
-  @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
-    final audioService = ref.read(audioServiceProvider);
-    final musicEnabled = ref.read(musicEnabledProvider);
-
-    if (state == AppLifecycleState.paused) {
-      // Pause music when app goes to background
-      audioService.pauseBackgroundMusic();
-    } else if (state == AppLifecycleState.resumed) {
-      // Resume music when app comes back
-      audioService.resumeBackgroundMusic(enabled: musicEnabled);
-    }
-  }
-
-  Future<void> _initMusic() async {
-    if (_musicInitialized) return;
-    _musicInitialized = true;
-
-    final audioService = ref.read(audioServiceProvider);
-    final musicEnabled = ref.read(musicEnabledProvider);
-
-    if (musicEnabled) {
-      await audioService.playBackgroundMusic(enabled: true);
-    }
-  }
-
+class _AppShellState extends ConsumerState<AppShell> {
   int _getCurrentIndex(BuildContext context) {
     final location = GoRouterState.of(context).matchedLocation;
     if (location.startsWith('/games')) return 1;
