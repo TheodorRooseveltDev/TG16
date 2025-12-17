@@ -89,9 +89,6 @@ class _PremiumHeroSectionState extends State<PremiumHeroSection>
       width: double.infinity,
       child: Stack(
         children: [
-          // Rotating decorative rings
-          _buildRotatingRings(screenWidth),
-
           // Radial glow behind logo
           _buildRadialGlow(),
 
@@ -115,11 +112,6 @@ class _PremiumHeroSectionState extends State<PremiumHeroSection>
                       children: [
                         // App name with shimmer
                         _buildAppName(),
-
-                        const SizedBox(height: 8),
-
-                        // Subtitle with decorative lines
-                        _buildSubtitle(),
 
                         const SizedBox(height: 24),
 
@@ -241,43 +233,10 @@ class _PremiumHeroSectionState extends State<PremiumHeroSection>
   }
 
   Widget _buildAppName() {
-    return ShaderMask(
-      shaderCallback: (bounds) {
-        return const LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            Color(0xFF8A8A8A),   // Dark edge
-            Color(0xFFB0B0B0),   // Medium
-            Color(0xFFD8D8D8),   // Light
-            Color(0xFFFFFFFF),   // Bright center highlight
-            Color(0xFFF0F0F0),   // Near white
-            Color(0xFFD0D0D0),   // Light
-            Color(0xFFB0B0B0),   // Medium
-            Color(0xFF909090),   // Dark edge
-          ],
-          stops: [0.0, 0.15, 0.3, 0.45, 0.55, 0.7, 0.85, 1.0],
-        ).createShader(bounds);
-      },
-      child: Text(
-        AppStrings.appName,
-        style: AppTypography.displayLarge.copyWith(
-          fontSize: 48,
-          fontWeight: FontWeight.w700,
-          letterSpacing: 8,
-          shadows: [
-            Shadow(
-              color: Colors.white.withOpacity(0.3),
-              blurRadius: 30,
-            ),
-            Shadow(
-              color: AppColors.silverDark.withOpacity(0.5),
-              blurRadius: 10,
-              offset: const Offset(0, 2),
-            ),
-          ],
-        ),
-      ),
+    return Image.asset(
+      'assets/images/text.png',
+      width: 300,
+      fit: BoxFit.contain,
     );
   }
 

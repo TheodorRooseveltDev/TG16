@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:video_player/video_player.dart';
 import '../../../core/theme/theme.dart';
 import '../../../shared/widgets/effects.dart';
 import '../../../shared/widgets/webview_screen.dart';
@@ -16,6 +17,7 @@ class _SplashScreenState extends State<SplashScreen>
     with SingleTickerProviderStateMixin {
   late AnimationController _pulseController;
   late Animation<double> _pulseAnimation;
+  late VideoPlayerController _videoController;
   bool _isLegalPageOpen = false;
   bool _readyToNavigate = false;
   bool? _hasCompletedOnboarding;
@@ -32,6 +34,16 @@ class _SplashScreenState extends State<SplashScreen>
     _pulseAnimation = Tween<double>(begin: 0.8, end: 1.0).animate(
       CurvedAnimation(parent: _pulseController, curve: Curves.easeInOut),
     );
+
+    // Initialize video player
+    _videoController = VideoPlayerController.asset('assets/video/loading.mp4')
+      ..initialize().then((_) {
+        if (mounted) {
+          setState(() {});
+          _videoController.setLooping(true);
+          _videoController.play();
+        }
+      });
 
     // Check onboarding status
     _checkOnboardingStatus();
@@ -68,6 +80,7 @@ class _SplashScreenState extends State<SplashScreen>
   @override
   void dispose() {
     _pulseController.dispose();
+    _videoController.dispose();
     super.dispose();
   }
 
@@ -75,7 +88,7 @@ class _SplashScreenState extends State<SplashScreen>
     _isLegalPageOpen = true;
     await WebViewScreen.open(
       context,
-      url: 'https://example.com',
+      url: 'https://luxuryloungecasinoapp.com/privacy-policy/',
       title: 'Privacy Policy',
     );
     _isLegalPageOpen = false;
@@ -88,7 +101,7 @@ class _SplashScreenState extends State<SplashScreen>
     _isLegalPageOpen = true;
     await WebViewScreen.open(
       context,
-      url: 'https://example.com',
+      url: 'https://luxuryloungecasinoapp.com/terms-and-conditions/',
       title: 'Terms of Service',
     );
     _isLegalPageOpen = false;
@@ -100,122 +113,62 @@ class _SplashScreenState extends State<SplashScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black,
-      body: ParticleBackground(
+      body: Container(
+        decoration: const BoxDecoration(
+          image: DecorationImage(
+            image: AssetImage('assets/images/splash.jpg'),
+            fit: BoxFit.cover,
+          ),
+        ),
         child: Stack(
           children: [
-            // Central glow - silver
-            Center(
-              child: AnimatedBuilder(
-                animation: _pulseAnimation,
-                builder: (context, child) {
-                  return Container(
-                    width: 300 * _pulseAnimation.value,
-                    height: 300 * _pulseAnimation.value,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      gradient: RadialGradient(
-                        colors: [
-                          const Color(0xFFD0D0D0).withOpacity(0.15),
-                          const Color(0xFFD0D0D0).withOpacity(0.05),
-                          Colors.transparent,
-                        ],
+            // Video player - centered
+            Align(
+              alignment: Alignment.center,
+              child: Transform.translate(
+                offset: const Offset(0, -40),
+                child: _videoController.value.isInitialized
+                  ? ClipOval(
+                      child: SizedBox(
+                        width: 200,
+                        height: 200,
+                        child: FittedBox(
+                          fit: BoxFit.cover,
+                          child: SizedBox(
+                            width: _videoController.value.size.width,
+                            height: _videoController.value.size.height,
+                            child: VideoPlayer(_videoController),
+                          ),
+                        ),
                       ),
+                    )
+                  : const SizedBox(
+                      width: 150,
+                      height: 150,
                     ),
-                  );
-                },
               ),
             ),
 
-            // Fade to black overlay at top
-            Positioned(
-              top: 0,
-              left: 0,
-              right: 0,
-              height: 150,
-              child: Container(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [
-                      Colors.black,
-                      Colors.black.withOpacity(0.8),
-                      Colors.transparent,
-                    ],
-                    stops: const [0.0, 0.5, 1.0],
-                  ),
+            // Text image - centered below video
+            Align(
+              alignment: Alignment.center,
+              child: Transform.translate(
+                offset: const Offset(0, 40),
+                child: Image.asset(
+                  'assets/images/text.png',
+                  width: 180,
+                  fit: BoxFit.contain,
                 ),
               ),
             ),
 
-            // Main content
-            SafeArea(
-              child: Column(
-                children: [
-                  const Spacer(flex: 3),
-
-                  // App name - silver metallic gradient
-                  ShaderMask(
-                    shaderCallback: (bounds) {
-                      return const LinearGradient(
-                        colors: [
-                          Color(0xFF909090),
-                          Color(0xFFB8B8B8),
-                          Color(0xFFE0E0E0),
-                          Color(0xFFFFFFFF),
-                          Color(0xFFF5F5F5),
-                          Color(0xFFD8D8D8),
-                          Color(0xFFB0B0B0),
-                          Color(0xFF888888),
-                        ],
-                        stops: [0.0, 0.12, 0.3, 0.45, 0.55, 0.7, 0.88, 1.0],
-                      ).createShader(bounds);
-                    },
-                    blendMode: BlendMode.srcIn,
-                    child: const Text(
-                      'LUXURY CASINO',
-                      style: TextStyle(
-                        fontSize: 28,
-                        fontWeight: FontWeight.w900,
-                        letterSpacing: 6,
-                      ),
-                    ),
-                  ),
-
-                  const SizedBox(height: 12),
-
-                  // Tagline
-                  Text(
-                    'Premium Social Gaming',
-                    style: TextStyle(
-                      fontSize: 13,
-                      letterSpacing: 3,
-                      color: AppColors.textSecondary,
-                    ),
-                  ),
-
-                  const SizedBox(height: 32),
-
-                  // Simple loading indicator - silver
-                  SizedBox(
-                    width: 24,
-                    height: 24,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2.5,
-                      valueColor: const AlwaysStoppedAnimation<Color>(
-                        Color(0xFFD0D0D0),
-                      ),
-                    ),
-                  ),
-
-                  const Spacer(flex: 4),
-
-                  // Privacy & Terms links
-                  _buildLegalLinks(),
-
-                  const SizedBox(height: 24),
-                ],
+            // Privacy & Terms links at bottom
+            Positioned(
+              bottom: 24,
+              left: 0,
+              right: 0,
+              child: SafeArea(
+                child: _buildLegalLinks(),
               ),
             ),
           ],

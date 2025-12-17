@@ -17,11 +17,11 @@ final audioServiceProvider = Provider<AudioService>((ref) {
 
 // Settings providers with persistence
 final soundEnabledProvider = StateNotifierProvider<SettingNotifier, bool>((ref) {
-  return SettingNotifier(_soundEnabledKey, true);
+  return SettingNotifier(_soundEnabledKey, false);
 });
 
 final vibrationEnabledProvider = StateNotifierProvider<SettingNotifier, bool>((ref) {
-  return SettingNotifier(_vibrationEnabledKey, true);
+  return SettingNotifier(_vibrationEnabledKey, false);
 });
 
 class SettingNotifier extends StateNotifier<bool> {

@@ -38,6 +38,9 @@ dependencies:
   permission_handler: ^11.3.1
   url_launcher: ^6.2.1
   
+  # Video Player
+  video_player: ^2.8.2
+  
   # Local Storage
   shared_preferences: ^2.2.2
 
@@ -64,4 +67,5 @@ flutter:
   assets:
     - .env
     - assets/sounds/
-    - assets/icon.png
+    - assets/images/
+    - assets/video/

@@ -1,4 +1,5 @@
 import 'dart:math' as math;
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import '../../core/theme/theme.dart';
 
@@ -24,7 +25,7 @@ class _ParticleBackgroundState extends State<ParticleBackground>
   void initState() {
     super.initState();
     _controller = AnimationController(
-      duration: const Duration(seconds: 10),
+      duration: const Duration(seconds: 20),
       vsync: this,
     )..repeat();
 
@@ -87,6 +88,13 @@ class _ParticleBackgroundState extends State<ParticleBackground>
             );
           },
         ),
+        // Blur layer
+        BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 8.0, sigmaY: 8.0),
+          child: Container(
+            color: Colors.transparent,
+          ),
+        ),
         // Main content
         widget.child,
       ],
@@ -101,7 +109,9 @@ class Particle {
   double speed;
   double opacity;
   double angle;
-  int silverTone; // 0 = white, 1 = light silver, 2 = medium silver
+  double rotation;
+  double rotationSpeed;
+  int silverTone;
 
   Particle({
     required this.x,
@@ -110,6 +120,8 @@ class Particle {
     required this.speed,
     required this.opacity,
     required this.angle,
+    required this.rotation,
+    required this.rotationSpeed,
     required this.silverTone,
   });
 
@@ -118,11 +130,13 @@ class Particle {
     return Particle(
       x: random.nextDouble(),
       y: random.nextDouble(),
-      size: random.nextDouble() * 3 + 1,
-      speed: random.nextDouble() * 0.3 + 0.1,
-      opacity: random.nextDouble() * 0.5 + 0.1,
+      size: random.nextDouble() * 4 + 2,
+      speed: random.nextDouble() * 0.15 + 0.05,
+      opacity: random.nextDouble() * 0.6 + 0.2,
       angle: random.nextDouble() * math.pi * 2,
-      silverTone: random.nextInt(3), // 0, 1, or 2
+      rotation: random.nextDouble() * math.pi * 2,
+      rotationSpeed: (random.nextDouble() - 0.5) * 2,
+      silverTone: random.nextInt(3),
     );
   }
   
@@ -151,18 +165,27 @@ class ParticlePainter extends CustomPainter {
     for (final particle in particles) {
       final progress = (animation + particle.speed) % 1.0;
       final y = (particle.y + progress) % 1.0;
-      final x = particle.x + math.sin(progress * math.pi * 2 + particle.angle) * 0.02;
+      final x = particle.x + math.sin(progress * math.pi * 2 + particle.angle) * 0.03;
+      final currentRotation = particle.rotation + (progress * particle.rotationSpeed * math.pi * 4);
 
       final paint = Paint()
         ..color = particle.color
             .withOpacity(particle.opacity * (1 - (y - 0.5).abs() * 2).clamp(0.0, 1.0))
-        ..maskFilter = MaskFilter.blur(BlurStyle.normal, particle.size);
+        ..style = PaintingStyle.fill;
 
-      canvas.drawCircle(
-        Offset(x * size.width, y * size.height),
-        particle.size,
-        paint,
+      canvas.save();
+      canvas.translate(x * size.width, y * size.height);
+      canvas.rotate(currentRotation);
+      
+      // Draw rectangle for confetti effect
+      final rect = Rect.fromCenter(
+        center: Offset.zero,
+        width: particle.size * 2,
+        height: particle.size * 4,
       );
+      canvas.drawRect(rect, paint);
+      
+      canvas.restore();
     }
   }
 

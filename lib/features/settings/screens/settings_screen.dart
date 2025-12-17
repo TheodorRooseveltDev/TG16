@@ -4,6 +4,7 @@ import '../../../core/theme/theme.dart';
 import '../../../core/constants/app_strings.dart';
 import '../../../core/services/audio_service.dart';
 import '../../../shared/widgets/webview_screen.dart';
+import '../../../shared/widgets/age_notice.dart';
 import '../widgets/contact_us_modal.dart';
 
 class SettingsScreen extends ConsumerWidget {
@@ -17,6 +18,7 @@ class SettingsScreen extends ConsumerWidget {
     final topPadding = MediaQuery.of(context).padding.top;
 
     return SingleChildScrollView(
+      physics: const ClampingScrollPhysics(),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -121,7 +123,7 @@ class SettingsScreen extends ConsumerWidget {
                     audioService.lightVibrate(enabled: vibrationEnabled);
                     WebViewScreen.open(
                       context,
-                      url: 'https://example.com',
+                      url: 'https://luxuryloungecasinoapp.com/terms-and-conditions/',
                       title: 'Terms of Service',
                     );
                   },
@@ -135,7 +137,7 @@ class SettingsScreen extends ConsumerWidget {
                     audioService.lightVibrate(enabled: vibrationEnabled);
                     WebViewScreen.open(
                       context,
-                      url: 'https://example.com',
+                      url: 'https://luxuryloungecasinoapp.com/privacy-policy/',
                       title: 'Privacy Policy',
                     );
                   },
@@ -143,6 +145,11 @@ class SettingsScreen extends ConsumerWidget {
                 ),
               ]),
             ),
+
+          const SizedBox(height: 24),
+
+          // Age Notice
+          const AgeNotice(),
 
           // Bottom padding for navbar
           SizedBox(height: 120 + MediaQuery.of(context).padding.bottom),

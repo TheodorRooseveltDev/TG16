@@ -3,8 +3,8 @@ import 'package:flutter/services.dart';
 import 'core/theme/app_theme.dart';
 import 'shared/navigation/app_router.dart';
 
-class LuxuryCasinoApp extends StatelessWidget {
-  const LuxuryCasinoApp({super.key});
+class LuxurLoungeApp extends StatelessWidget {
+  const LuxurLoungeApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -25,7 +25,7 @@ class LuxuryCasinoApp extends StatelessWidget {
         FocusManager.instance.primaryFocus?.unfocus();
       },
       child: MaterialApp.router(
-        title: 'Luxury Casino',
+        title: 'Luxury Lounge Casino',
         debugShowCheckedModeBanner: false,
         theme: AppTheme.darkTheme,
         routerConfig: router,

@@ -1,17 +1,17 @@
 {
   "images" : [
     {
-      "filename" : "a-luxurious-dark-vertical-gradient-backg_QQJJVUy9RBOGb80oHEfUpA_hEnO2JImRfOsy05sl3DCKQ.png",
+      "filename" : "splash-min.jpg",
       "idiom" : "universal",
       "scale" : "1x"
     },
     {
-      "filename" : "a-luxurious-dark-vertical-gradient-backg_QQJJVUy9RBOGb80oHEfUpA_hEnO2JImRfOsy05sl3DCKQ@2x.png",
+      "filename" : "splash@2x-min.jpg",
       "idiom" : "universal",
       "scale" : "2x"
     },
     {
-      "filename" : "a-luxurious-dark-vertical-gradient-backg_QQJJVUy9RBOGb80oHEfUpA_hEnO2JImRfOsy05sl3DCKQ@3x.png",
+      "filename" : "splash@3x-min.jpg",
       "idiom" : "universal",
       "scale" : "3x"
     }

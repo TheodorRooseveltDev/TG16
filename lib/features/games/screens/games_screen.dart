@@ -6,6 +6,7 @@ import '../models/game.dart';
 import '../providers/games_provider.dart';
 import '../../../shared/widgets/premium_game_card.dart';
 import '../../../shared/widgets/effects.dart';
+import '../../../shared/widgets/age_notice.dart';
 
 class GamesScreen extends ConsumerWidget {
   const GamesScreen({super.key});
@@ -17,34 +18,109 @@ class GamesScreen extends ConsumerWidget {
     final topPadding = MediaQuery.of(context).padding.top;
 
     return SingleChildScrollView(
+      physics: const ClampingScrollPhysics(),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Top padding for status bar area (content scrolls under gradient)
           SizedBox(height: topPadding + 20),
 
-          // Page Header
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Games',
-                    style: AppTypography.headingLarge.copyWith(
-                      letterSpacing: 1,
-                    ),
+          // Promo Card Header
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            child: Container(
+              height: 200,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(
+                  color: const Color(0xFFC0C0C0).withOpacity(0.5), // Silver border with reduced opacity
+                  width: 1,
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.3),
+                    blurRadius: 15,
+                    offset: const Offset(0, 8),
                   ),
-                  const SizedBox(height: 4),
-                  Text(
-                    'Discover premium casino games',
-                    style: AppTypography.bodySmall.copyWith(
-                      color: AppColors.textTertiary,
-                    ),
+                  BoxShadow(
+                    color: const Color(0xFFC0C0C0).withOpacity(0.3),
+                    blurRadius: 30,
+                    spreadRadius: -5,
                   ),
                 ],
               ),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(18),
+                child: Stack(
+                  fit: StackFit.expand,
+                  children: [
+                    // Background image
+                    Image.asset(
+                      'assets/images/promo.jpeg',
+                      fit: BoxFit.cover,
+                    ),
+                    // Gradient overlay (top-left corner) - larger
+                    Positioned(
+                      top: 0,
+                      left: 0,
+                      child: Container(
+                        width: 350,
+                        height: 200,
+                        decoration: BoxDecoration(
+                          gradient: RadialGradient(
+                            center: Alignment.topLeft,
+                            radius: 1.2,
+                            colors: [
+                              Colors.black.withOpacity(0.95),
+                              Colors.black.withOpacity(0.8),
+                              Colors.black.withOpacity(0.5),
+                              Colors.black.withOpacity(0.0),
+                            ],
+                            stops: const [0.0, 0.35, 0.65, 1.0],
+                          ),
+                        ),
+                      ),
+                    ),
+                    // Text content
+                    Positioned(
+                      top: 24,
+                      left: 24,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Games',
+                            style: AppTypography.headingLarge.copyWith(
+                              letterSpacing: 1,
+                              shadows: [
+                                Shadow(
+                                  color: Colors.black.withOpacity(0.5),
+                                  blurRadius: 8,
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            'Discover premium casino games',
+                            style: AppTypography.bodySmall.copyWith(
+                              color: AppColors.textSecondary,
+                              shadows: [
+                                Shadow(
+                                  color: Colors.black.withOpacity(0.5),
+                                  blurRadius: 8,
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             ),
+          ),
 
             const SizedBox(height: 28),
 
@@ -61,6 +137,11 @@ class GamesScreen extends ConsumerWidget {
               loading: () => _buildLoadingSection(),
               error: (_, __) => const SizedBox.shrink(),
             ),
+
+            const SizedBox(height: 32),
+
+            // Age Notice
+            const AgeNotice(),
 
           // Bottom padding for navbar
           SizedBox(height: 120 + MediaQuery.of(context).padding.bottom),

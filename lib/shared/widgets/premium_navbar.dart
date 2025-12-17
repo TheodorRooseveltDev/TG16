@@ -61,12 +61,12 @@ class _PremiumNavbarState extends State<PremiumNavbar>
               color: const Color(0xFF0A0A0A),
               borderRadius: BorderRadius.circular(36),
               border: Border.all(
-                width: 1.5,
+                width: 1,
                 color: Color.lerp(
                   const Color(0xFF909090),
                   const Color(0xFFD0D0D0),
                   _glowAnimation.value,
-                )!,
+                )!.withOpacity(0.5),
               ),
               boxShadow: [
                 // Outer silver glow

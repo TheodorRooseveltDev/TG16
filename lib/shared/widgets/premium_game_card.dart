@@ -10,6 +10,7 @@ class PremiumGameCard extends ConsumerStatefulWidget {
   final VoidCallback? onTap;
   final double width;
   final double height;
+  final bool showBorder;
 
   const PremiumGameCard({
     super.key,
@@ -17,6 +18,7 @@ class PremiumGameCard extends ConsumerStatefulWidget {
     this.onTap,
     this.width = 160,
     this.height = 220,
+    this.showBorder = false,
   });
 
   @override
@@ -151,6 +153,10 @@ class _PremiumGameCardState extends ConsumerState<PremiumGameCard>
               height: widget.height,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(20),
+                border: widget.showBorder ? Border.all(
+                  color: const Color(0xFFC0C0C0).withOpacity(0.8), // Silver border
+                  width: 1,
+                ) : null,
                 boxShadow: [
                   BoxShadow(
                     color: Colors.black.withOpacity(0.5),
@@ -222,13 +228,17 @@ class _PremiumGameCardState extends ConsumerState<PremiumGameCard>
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                             decoration: BoxDecoration(
-                              gradient: LinearGradient(
-                                colors: [AppColors.primary, AppColors.primary.withOpacity(0.8)],
+                              gradient: const LinearGradient(
+                                colors: [
+                                  Color(0xFFC0C0C0), // Silver
+                                  Color(0xFFE0E0E0), // Light silver
+                                  Color(0xFFC0C0C0), // Silver
+                                ],
                               ),
                               borderRadius: BorderRadius.circular(25),
                               boxShadow: [
                                 BoxShadow(
-                                  color: AppColors.primary.withOpacity(0.4),
+                                  color: const Color(0xFFC0C0C0).withOpacity(0.4),
                                   blurRadius: 12,
                                   offset: const Offset(0, 4),
                                 ),

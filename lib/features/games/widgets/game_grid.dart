@@ -96,6 +96,7 @@ class _GameGridState extends ConsumerState<GameGrid>
                     child: PremiumGameCard(
                       game: game,
                       onTap: () => widget.onGameTap?.call(game),
+                      showBorder: true,
                     ),
                   ),
                 ),

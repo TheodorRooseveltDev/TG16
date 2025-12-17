@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import '../../../core/theme/theme.dart';
+import '../../../shared/widgets/age_notice.dart';
 import '../models/game.dart';
 
 class GameDetailScreen extends StatefulWidget {
@@ -556,8 +557,8 @@ class _GameDetailScreenState extends State<GameDetailScreen>
     // If animated logo exists and webview is ready, show animated version
     if (widget.game.animatedLogo != null && _webViewController != null && _webViewReady) {
       return Container(
-        width: 90,
-        height: 90,
+        width: 110,
+        height: 140,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(18),
           boxShadow: [
@@ -584,13 +585,13 @@ class _GameDetailScreenState extends State<GameDetailScreen>
     final iconUrl = widget.game.displayIcon;
 
     return Container(
-      width: 90,
-      height: 90,
+      width: 110,
+      height: 140,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(18),
         boxShadow: [
           BoxShadow(
-            color: AppColors.primary.withOpacity(0.3),
+            color: const Color(0xFFC0C0C0).withOpacity(0.3),
             blurRadius: 20,
             spreadRadius: 2,
           ),
@@ -601,8 +602,8 @@ class _GameDetailScreenState extends State<GameDetailScreen>
           ),
         ],
         border: Border.all(
-          color: AppColors.primary.withOpacity(0.3),
-          width: 2,
+          color: const Color(0xFFC0C0C0).withOpacity(0.8),
+          width: 1,
         ),
       ),
       child: ClipRRect(
@@ -686,11 +687,10 @@ class _GameDetailScreenState extends State<GameDetailScreen>
 
               const SizedBox(height: 28),
 
-              // Play Button - needs right padding
-              Padding(
-                padding: const EdgeInsets.only(right: 24),
-                child: _buildPlayButton(),
-              ),
+              // Age Notice
+              const AgeNotice(),
+
+              const SizedBox(height: 28),
             ],
           ),
         ),

@@ -4,6 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../../core/theme/theme.dart';
 import '../../../shared/widgets/effects.dart';
 import '../../../shared/widgets/webview_screen.dart';
+import '../../../shared/widgets/age_notice.dart';
 
 class OnboardingScreen extends StatefulWidget {
   const OnboardingScreen({super.key});
@@ -42,7 +43,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   void _openTerms() async {
     await WebViewScreen.open(
       context,
-      url: 'https://example.com',
+      url: 'https://luxuryloungecasinoapp.com/terms-and-conditions/',
       title: 'Terms & Conditions',
     );
   }
@@ -50,7 +51,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   void _openPrivacy() async {
     await WebViewScreen.open(
       context,
-      url: 'https://example.com',
+      url: 'https://luxuryloungecasinoapp.com/privacy-policy/',
       title: 'Privacy Policy',
     );
   }
@@ -58,32 +59,25 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black,
-      body: ParticleBackground(
+      body: Container(
+        decoration: const BoxDecoration(
+          image: DecorationImage(
+            image: AssetImage('assets/images/splash.jpg'),
+            fit: BoxFit.cover,
+          ),
+        ),
         child: SafeArea(
-          child: Center(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(horizontal: 32),
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.symmetric(horizontal: 32),
+            child: ConstrainedBox(
+              constraints: BoxConstraints(
+                minHeight: MediaQuery.of(context).size.height - MediaQuery.of(context).padding.top - MediaQuery.of(context).padding.bottom,
+              ),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const SizedBox(height: 40),
-
-                  // App Icon with glow
+                  // App Icon
                   _buildIconWithGlow(),
-
-                  const SizedBox(height: 32),
-
-                  // Welcome text
-                  Text(
-                    'Welcome!',
-                    style: AppTypography.headingLarge.copyWith(
-                      fontSize: 32,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-
-                  const SizedBox(height: 16),
 
                   // Description
                   Text(
@@ -175,7 +169,10 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                   // Continue button
                   _buildContinueButton(),
 
-                  const SizedBox(height: 40),
+                  const SizedBox(height: 24),
+
+                  // Age Notice
+                  const AgeNotice(),
                 ],
               ),
             ),
@@ -187,35 +184,22 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
   Widget _buildIconWithGlow() {
     return Container(
-      width: 140,
-      height: 140,
+      width: 160,
+      height: 160,
       decoration: BoxDecoration(
-        shape: BoxShape.circle,
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFFD0D0D0).withOpacity(0.4),
+            color: Colors.black.withOpacity(0.3),
             blurRadius: 40,
             spreadRadius: 10,
           ),
-          BoxShadow(
-            color: const Color(0xFFD0D0D0).withOpacity(0.2),
-            blurRadius: 80,
-            spreadRadius: 20,
-          ),
         ],
       ),
-      child: Container(
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          border: Border.all(
-            color: const Color(0xFFD0D0D0).withOpacity(0.6),
-            width: 3,
-          ),
-        ),
-        padding: const EdgeInsets.all(8),
-        child: ClipOval(
-          child: Image.asset('assets/icon.png', fit: BoxFit.cover),
-        ),
+      child: Image.asset(
+        'assets/images/icon.png',
+        width: 160,
+        height: 160,
+        fit: BoxFit.contain,
       ),
     );
   }
@@ -224,11 +208,6 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.05),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFFD0D0D0).withOpacity(0.3), width: 1),
-      ),
       child: Column(
         children: [
           // Age checkbox
@@ -243,7 +222,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
           // Terms checkbox
           _buildCheckboxRow(
             text:
-                'I have read and agree to Luxury Casino\'s Terms & Conditions and Privacy Policy.',
+                'I have read and agree to Luxury Lounge Casino\'s Terms & Conditions and Privacy Policy.',
             value: _acceptTermsAndPrivacy,
             onChanged: (v) => setState(() => _acceptTermsAndPrivacy = v),
           ),
