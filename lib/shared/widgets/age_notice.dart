@@ -8,8 +8,8 @@ class AgeNotice extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // 18+ Icon
           Image.asset(
@@ -17,15 +17,17 @@ class AgeNotice extends StatelessWidget {
             width: 48,
             height: 48,
           ),
-          const SizedBox(height: 12),
+          const SizedBox(width: 12),
           // Notice text
-          Text(
-            'These games are intended for an adult audience only (18+). These games do not offer any real money wagering or a chance to win real money prizes.',
-            style: AppTypography.bodySmall.copyWith(
-              color: AppColors.textTertiary,
-              height: 1.5,
+          Expanded(
+            child: Text(
+              'These games are intended for an adult audience only (18+). These games do not offer any real money wagering or a chance to win real money prizes.',
+              style: AppTypography.bodySmall.copyWith(
+                color: AppColors.textTertiary,
+                height: 1.5,
+              ),
+              textAlign: TextAlign.left,
             ),
-            textAlign: TextAlign.center,
           ),
         ],
       ),

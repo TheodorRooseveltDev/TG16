@@ -1,3 +1,4 @@
+import 'dart:math';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/game.dart';
 import '../repository/games_repository.dart';
@@ -35,20 +36,26 @@ final gamesProvider = FutureProvider<List<Game>>((ref) async {
   }).toList();
 });
 
-// Premium games - games with animated icons (first 10)
+// Premium games - randomly select 5 games from all games
 final animatedGamesProvider = FutureProvider<List<Game>>((ref) async {
   final games = await ref.watch(gamesProvider.future);
-  // Filter games that have animated icons, take first 10
-  final premiumGames = games
-      .where((game) => game.hasAnimatedIcon || game.animatedLogo != null)
-      .take(10)
-      .toList();
-
-  // If no animated games found, just return first 10
-  if (premiumGames.isEmpty) {
-    return games.take(10).toList();
+  
+  // Randomly select 5 games from all available games
+  if (games.length <= 5) {
+    return games;
   }
-  return premiumGames;
+  
+  final random = Random();
+  final selectedGames = <Game>[];
+  final availableIndices = List<int>.generate(games.length, (i) => i);
+  
+  for (int i = 0; i < 5; i++) {
+    final randomIndex = random.nextInt(availableIndices.length);
+    final gameIndex = availableIndices.removeAt(randomIndex);
+    selectedGames.add(games[gameIndex]);
+  }
+  
+  return selectedGames;
 });
 
 // Static/More games - the rest

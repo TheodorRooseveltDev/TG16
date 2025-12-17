@@ -154,6 +154,7 @@ class _GameDetailScreenState extends State<GameDetailScreen>
 
   Widget _buildBannerImage() {
     final bannerUrl = widget.game.displayBanner;
+    final iconUrl = widget.game.displayIcon;
 
     // Check if it's a network URL
     if (bannerUrl.isNotEmpty && Game.isNetworkUrl(bannerUrl)) {
@@ -169,12 +170,36 @@ class _GameDetailScreenState extends State<GameDetailScreen>
             ),
           ),
         ),
-        errorWidget: (context, url, error) => Container(
-          color: AppColors.backgroundCard,
-          child: const Center(
-            child: Icon(Icons.casino, size: 60, color: Color(0xFFD0D0D0)),
-          ),
-        ),
+        errorWidget: (context, url, error) {
+          // Banner failed to load, fallback to icon if available
+          if (iconUrl.isNotEmpty && Game.isNetworkUrl(iconUrl)) {
+            return CachedNetworkImage(
+              imageUrl: iconUrl,
+              fit: BoxFit.cover,
+              placeholder: (context, url) => Container(
+                color: AppColors.backgroundCard,
+                child: const Center(
+                  child: CircularProgressIndicator(
+                    color: AppColors.primary,
+                    strokeWidth: 2,
+                  ),
+                ),
+              ),
+              errorWidget: (context, url, error) => Container(
+                color: AppColors.backgroundCard,
+                child: const Center(
+                  child: Icon(Icons.casino, size: 60, color: Color(0xFFD0D0D0)),
+                ),
+              ),
+            );
+          }
+          return Container(
+            color: AppColors.backgroundCard,
+            child: const Center(
+              child: Icon(Icons.casino, size: 60, color: Color(0xFFD0D0D0)),
+            ),
+          );
+        },
       );
     }
 
@@ -191,6 +216,29 @@ class _GameDetailScreenState extends State<GameDetailScreen>
             ),
           );
         },
+      );
+    }
+
+    // No banner URL, use icon instead
+    if (iconUrl.isNotEmpty && Game.isNetworkUrl(iconUrl)) {
+      return CachedNetworkImage(
+        imageUrl: iconUrl,
+        fit: BoxFit.cover,
+        placeholder: (context, url) => Container(
+          color: AppColors.backgroundCard,
+          child: const Center(
+            child: CircularProgressIndicator(
+              color: AppColors.primary,
+              strokeWidth: 2,
+            ),
+          ),
+        ),
+        errorWidget: (context, url, error) => Container(
+          color: AppColors.backgroundCard,
+          child: const Center(
+            child: Icon(Icons.casino, size: 60, color: Color(0xFFD0D0D0)),
+          ),
+        ),
       );
     }
 
