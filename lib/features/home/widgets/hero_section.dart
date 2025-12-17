@@ -69,9 +69,17 @@ class HeroSection extends StatelessWidget {
                   style: AppTypography.displayLarge,
                 ),
 
-                const SizedBox(height: 8),
+                const SizedBox(height: 4),
 
-                // CASINO with decorative lines
+                // LOUNGE text
+                Text(
+                  AppStrings.appSubtitle,
+                  style: AppTypography.displayLarge,
+                ),
+
+                const SizedBox(height: 16),
+
+                // casino with decorative lines
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
@@ -83,7 +91,7 @@ class HeroSection extends StatelessWidget {
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 16),
                       child: Text(
-                        AppStrings.appSubtitle,
+                        AppStrings.appTagline,
                         style: AppTypography.bodySmall.copyWith(
                           letterSpacing: 8,
                           color: AppColors.textSecondary,

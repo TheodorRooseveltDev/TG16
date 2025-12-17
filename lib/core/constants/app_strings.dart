@@ -3,7 +3,8 @@ class AppStrings {
 
   // App name
   static const String appName = 'LUXURY';
-  static const String appSubtitle = 'CASINO';
+  static const String appSubtitle = 'LOUNGE';
+  static const String appTagline = 'casino';
 
   // Navigation
   static const String navHome = 'Home';
