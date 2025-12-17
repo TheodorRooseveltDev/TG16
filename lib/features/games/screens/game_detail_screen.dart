@@ -501,12 +501,9 @@ class _GameDetailScreenState extends State<GameDetailScreen>
                                 maxLines: 2,
                                 overflow: TextOverflow.ellipsis,
                               ),
-                              // Only show hero play button if there are screenshots
-                              if (widget.game.screenshots != null &&
-                                  widget.game.screenshots!.isNotEmpty) ...[
-                                const SizedBox(height: 12),
-                                _buildHeroPlayButton(),
-                              ],
+                              // Always show hero play button
+                              const SizedBox(height: 12),
+                              _buildHeroPlayButton(),
                             ],
                           ),
                         ),
