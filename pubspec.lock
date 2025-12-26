@@ -9,6 +9,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.0.0"
+  advertising_id:
+    dependency: "direct main"
+    description:
+      name: advertising_id
+      sha256: ab06ee85203ab500be85b7f45de2a75a629d8d9c453dba779276fbc4e97ad8d3
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.7.1"
   app_links:
     dependency: transitive
     description:
@@ -41,6 +49,22 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.0.4"
+  app_tracking_transparency:
+    dependency: "direct main"
+    description:
+      name: app_tracking_transparency
+      sha256: "1f71f4d8402552fbf8b191d4edab301f233c1af794878b7bc56c708470ffd74c"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.0.6+1"
+  appsflyer_sdk:
+    dependency: "direct main"
+    description:
+      name: appsflyer_sdk
+      sha256: b5908378c20a3983760ba463060711f7b1363fd26e4d0ccdf8d5bd8352b7ef69
+      url: "https://pub.dev"
+    source: hosted
+    version: "6.17.7+1"
   args:
     dependency: transitive
     description:
@@ -398,6 +422,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "6.0.0"
+  flutter_meta_sdk:
+    dependency: "direct main"
+    description:
+      name: flutter_meta_sdk
+      sha256: fad1e29adf4fb13bdc0a1d7069d8bc89e240f8f3fd117f614d2653ad2d41d84b
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.0.5"
   flutter_plugin_android_lifecycle:
     dependency: transitive
     description:
@@ -489,7 +521,7 @@ packages:
     source: hosted
     version: "0.15.6"
   http:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: http
       sha256: "87721a4a50b19c7f1d49001e51409bddc46303966ce89a65af4f4e6004896412"
@@ -568,6 +600,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.2.2"
+  json_annotation:
+    dependency: transitive
+    description:
+      name: json_annotation
+      sha256: "1ce844379ca14835a50d2f019a3099f419082cfdd231cd86a142af94dd5c6bb1"
+      url: "https://pub.dev"
+    source: hosted
+    version: "4.9.0"
   jwt_decode:
     dependency: transitive
     description:
@@ -656,6 +696,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.1.0"
+  onesignal_flutter:
+    dependency: "direct main"
+    description:
+      name: onesignal_flutter
+      sha256: "97aa641092f73c56498f04081f5eaa591018c6c46b5cb500939270d0282bc7bf"
+      url: "https://pub.dev"
+    source: hosted
+    version: "5.3.5"
   path:
     dependency: transitive
     description:
@@ -1110,7 +1158,7 @@ packages:
     source: hosted
     version: "3.1.5"
   uuid:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: uuid
       sha256: a11b666489b1954e01d992f3d601b1804a33937b5a8fe677bd26b8a9f96f96e8
@@ -1310,5 +1358,5 @@ packages:
     source: hosted
     version: "2.1.0"
 sdks:
-  dart: ">=3.10.1 <4.0.0"
+  dart: ">=3.9.0 <4.0.0"
   flutter: ">=3.35.0"

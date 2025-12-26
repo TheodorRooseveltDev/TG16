@@ -24,14 +24,35 @@
 	<string>????</string>
 	<key>CFBundleVersion</key>
 	<string>$(FLUTTER_BUILD_NUMBER)</string>
+	<key>FacebookAppID</key>
+	<string>866474479299997</string>
+	<key>FacebookClientToken</key>
+	<string>2f5c759b9faf00f2f2749a73a2d7a9f8</string>
+	<key>FacebookDisplayName</key>
+	<string>Luxury Lounge Casino</string>
+	<key>LSApplicationQueriesSchemes</key>
+	<array>
+		<string>fbapi</string>
+		<string>fb-messenger-share-api</string>
+		<string>fbauth2</string>
+		<string>fbshareextension</string>
+	</array>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<key>NSAdvertisingAttributionReportEndpoint</key>
+	<string>https://appsflyer-skadnetwork.com/</string>
 	<key>NSCameraUsageDescription</key>
 	<string>We need camera access to let you attach photos to your support messages</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>We need photo library access to let you attach images to your support messages</string>
+	<key>NSUserTrackingUsageDescription</key>
+	<string>We use tracking to improve app performance and analytics and deliver a faster experience.</string>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>remote-notification</string>
+	</array>
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>
 	<key>UIMainStoryboardFile</key>

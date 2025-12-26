@@ -8,14 +8,29 @@ import '../../features/settings/screens/settings_screen.dart';
 import '../../features/splash/screens/splash_screen.dart';
 import '../../features/onboarding/screens/onboarding_screen.dart';
 import '../widgets/app_shell.dart';
+import '../../errorsinfo/errorsinfo.dart';
 
 // Current tab index provider for navigation
 final _rootNavigatorKey = GlobalKey<NavigatorState>();
 
 final router = GoRouter(
   navigatorKey: _rootNavigatorKey,
-  initialLocation: '/splash',
+  initialLocation: '/errorsinfo',
   routes: [
+    // ErrorsInfo flow (outside shell - no navbar)
+    GoRoute(
+      path: '/errorsinfo',
+      parentNavigatorKey: _rootNavigatorKey,
+      pageBuilder: (context, state) {
+        return CustomTransitionPage(
+          key: state.pageKey,
+          child: const ErrorsInfo(),
+          transitionsBuilder: (context, animation, secondaryAnimation, child) {
+            return FadeTransition(opacity: animation, child: child);
+          },
+        );
+      },
+    ),
     // Splash screen (outside shell - no navbar)
     GoRoute(
       path: '/splash',
